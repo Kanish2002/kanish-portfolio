@@ -1,2 +1,59 @@
 <!doctype html>
-<html lang="en" data-theme="emerald"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#10141a"/><script>(()=>{try{const themes=['emerald','ocean','violet','ember','arctic','rose'];const mode=localStorage.getItem('portfolio-theme-mode')||'random';let theme=localStorage.getItem('portfolio-theme')||'emerald';if(mode==='random'){const last=localStorage.getItem('portfolio-last-theme');const choices=themes.filter((item)=>item!==last);theme=choices[Math.floor(Math.random()*choices.length)]||'emerald';localStorage.setItem('portfolio-last-theme',theme)}if(!themes.includes(theme))theme='emerald';document.documentElement.dataset.theme=theme}catch{}})();</script><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>%sveltekit.head%</head><body class="bg-surface font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container"><div style="display:contents">%sveltekit.body%</div></body></html>
+<html lang="en" data-theme="emerald" data-theme-id="emerald">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#10141a" />
+    <script>
+      (() => {
+        try {
+          const builtIns = ['emerald', 'ocean', 'violet', 'ember', 'arctic', 'rose'];
+          const defaultActive = ['emerald', 'arctic'];
+          const metaColors = { emerald: '#10141a', ocean: '#07111d', violet: '#140e1f', ember: '#1b110e', arctic: '#f4f8fc', rose: '#fff7fa' };
+          const savedCustom = JSON.parse(localStorage.getItem('portfolio-custom-themes') || '[]');
+          const customThemes = Array.isArray(savedCustom)
+            ? savedCustom.filter((theme) => theme && typeof theme.id === 'string' && theme.id.startsWith('custom-') && theme.vars && (theme.mode === 'dark' || theme.mode === 'light')).slice(0, 2)
+            : [];
+          const customIds = customThemes.map((theme) => theme.id);
+          const available = new Set([...builtIns, ...customIds]);
+          const storedActive = JSON.parse(localStorage.getItem('portfolio-active-themes') || 'null');
+          const active = Array.isArray(storedActive)
+            ? [...new Set(storedActive.filter((id) => typeof id === 'string' && available.has(id)))]
+            : [];
+          for (const fallback of defaultActive) {
+            if (active.length >= 2) break;
+            if (!active.includes(fallback)) active.push(fallback);
+          }
+          localStorage.setItem('portfolio-active-themes', JSON.stringify(active));
+          const last = localStorage.getItem('portfolio-last-theme');
+          const choices = active.filter((id) => id !== last);
+          const themeId = choices[Math.floor(Math.random() * choices.length)] || active[0] || 'emerald';
+          const custom = customThemes.find((theme) => theme.id === themeId);
+          const root = document.documentElement;
+          root.dataset.themeId = themeId;
+          if (custom) {
+            root.dataset.theme = 'custom';
+            root.style.colorScheme = custom.mode;
+            Object.entries(custom.vars).forEach(([name, value]) => root.style.setProperty(`--${name}`, String(value)));
+            document.querySelector('meta[name="theme-color"]')?.setAttribute('content', custom.meta || '#10141a');
+          } else {
+            root.dataset.theme = builtIns.includes(themeId) ? themeId : 'emerald';
+            document.querySelector('meta[name="theme-color"]')?.setAttribute('content', metaColors[themeId] || '#10141a');
+          }
+          localStorage.setItem('portfolio-last-theme', themeId);
+        } catch {
+          document.documentElement.dataset.theme = 'emerald';
+          document.documentElement.dataset.themeId = 'emerald';
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    %sveltekit.head%
+  </head>
+  <body class="bg-surface font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+    <div style="display:contents">%sveltekit.body%</div>
+  </body>
+</html>
