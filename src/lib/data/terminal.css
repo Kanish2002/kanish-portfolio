@@ -18,6 +18,14 @@ main > div > section:first-child > div.relative.z-10 { animation: heroIn .85s cu
 .interactive-link:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,255,135,.13); }
 .interactive-link::after { content: ''; position: absolute; inset: 0; width: 38%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent); transform: translateX(-140%) skewX(-20deg); pointer-events: none; }
 .interactive-link:hover::after { animation: sheen .7s ease-out; }
+.bg-primary-container.text-on-primary-container { color: #062416 !important; }
+.bg-primary-container.text-on-primary-container:hover { color: #062416 !important; }
+@keyframes quoteFlash { 0% { background: rgba(0,255,135,.26); } 100% { background: transparent; } }
+@keyframes entrySlide { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: translateX(0); } }
+.quote-updated { animation: quoteFlash .8s ease-out; }
+.execution-entry { animation: entrySlide .3s ease-out; min-width: 0; }
+.execution-entry > span:first-child { overflow-wrap: anywhere; }
+.depth-bar { transition: width .45s ease; }
 .nav-item { transition: color .2s, background .2s, transform .2s; }
 .nav-item:hover { transform: translateY(-2px); }
 a:focus-visible, button:focus-visible { outline: 2px solid #00ff87; outline-offset: 3px; }
@@ -29,12 +37,34 @@ a:focus-visible, button:focus-visible { outline: 2px solid #00ff87; outline-offs
 .mobile-nav a:hover { color: #00ff87; background: #262a31; }
 .menu-toggle { display: none; width: 2.5rem; height: 2.5rem; align-items: center; justify-content: center; border: 1px solid #3b4b3d; border-radius: .25rem; color: #dfe2eb; }
 @media (max-width: 1023px) { .menu-toggle { display: inline-flex; } }
+@media (max-width: 1023px) {
+  #orderbook-terminal > div:not(.demo-ribbon) { min-width: 0; }
+  #orderbook-terminal .font-mono, #orderbook-terminal .font-code-sm { font-size: .75rem; line-height: 1.55; }
+  #orderbook-terminal .bg-surface-container-high { flex-wrap: wrap; gap: .4rem; }
+  .interactive-card { max-width: 100%; }
+}
 @media (max-width: 680px) {
   main > div > section:first-child h1 { font-size: clamp(2.75rem, 11vw, 4.25rem) !important; text-wrap: balance; }
   main > div > section:first-child .flex.items-center.gap-space-sm:has(h1) { flex-wrap: wrap; justify-content: center; }
   header .h-16 { gap: .4rem; }
   section { overflow-x: clip; }
   #orderbook-terminal { overflow-x: auto; }
+  main > div > section:first-child { padding-top: 2rem; }
+  main > div > section:first-child .max-w-3xl { max-width: 100%; }
+  main > div > section:first-child .flex.flex-wrap.items-center.justify-center { gap: .55rem; }
+  main > div > section:first-child .flex.flex-wrap.items-center.justify-center a { min-height: 2.75rem; }
+  #orderbook-terminal .grid-cols-2 { gap: .6rem; }
+  #orderbook-terminal .flex.justify-between { gap: .35rem; }
+  #orderbook-terminal .flex.justify-between > span { min-width: 0; }
+  .interactive-card p, section p.font-body-sm { font-size: .875rem; line-height: 1.5; }
+  section .text-\[11px\], section .text-\[10px\] { font-size: .75rem; line-height: 1.4; }
+  section h2 { text-wrap: balance; }
+  section h3, section h4, section p { overflow-wrap: anywhere; }
+}
+@media (max-width: 390px) {
+  header .h-16 > div:last-child > a[aria-label='GitHub'] { display: none; }
+  .demo-ribbon { font-size: .625rem; }
+  #orderbook-terminal .font-mono, #orderbook-terminal .font-code-sm { font-size: .7rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
