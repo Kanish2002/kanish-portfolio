@@ -7,6 +7,121 @@
     const root = document.querySelector('main');
     if (!root) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const themes = {
+      emerald: { name: 'Emerald Exchange', short: 'Emerald', meta: '#10141a' },
+      ocean: { name: 'Ocean Terminal', short: 'Ocean', meta: '#07111d' },
+      violet: { name: 'Violet Ledger', short: 'Violet', meta: '#140e1f' },
+      ember: { name: 'Ember Markets', short: 'Ember', meta: '#1b110e' },
+      arctic: { name: 'Arctic Desk', short: 'Arctic', meta: '#f4f8fc' },
+      rose: { name: 'Rose Banking', short: 'Rose', meta: '#fff7fa' }
+    } as const;
+    type ThemeId = keyof typeof themes;
+    const themeIds = Object.keys(themes) as ThemeId[];
+    const themePanel = document.getElementById('theme-panel');
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeClose = document.getElementById('theme-close');
+    const themeShuffle = document.getElementById('theme-shuffle');
+    const themeRandom = document.getElementById('theme-random') as HTMLInputElement | null;
+    const themeCurrentName = document.getElementById('theme-current-name');
+    const themeCurrentShort = document.querySelector<HTMLElement>('.theme-current-short');
+    const themeStatus = document.getElementById('theme-status');
+    const themeChoices = [...document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')];
+    const storedMode = (() => {
+      try { return localStorage.getItem('portfolio-theme-mode') ?? 'random'; } catch { return 'random'; }
+    })();
+    let activeTheme = themeIds.includes(document.documentElement.dataset.theme as ThemeId)
+      ? document.documentElement.dataset.theme as ThemeId
+      : 'emerald';
+    let themeTransitionTimer = 0;
+
+    const syncThemeUI = (announce = true) => {
+      const config = themes[activeTheme];
+      if (themeCurrentName) themeCurrentName.textContent = config.name;
+      if (themeCurrentShort) themeCurrentShort.textContent = config.short;
+      if (themeStatus && announce) themeStatus.textContent = `${config.name} theme applied.`;
+      themeChoices.forEach((choice) => {
+        const selected = choice.dataset.themeChoice === activeTheme;
+        choice.classList.toggle('is-active', selected);
+        choice.setAttribute('aria-checked', String(selected));
+      });
+      document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', config.meta);
+    };
+    const applyTheme = (theme: ThemeId, lock = false, announce = true) => {
+      activeTheme = theme;
+      if (!reducedMotion) {
+        document.documentElement.classList.add('theme-changing');
+        window.clearTimeout(themeTransitionTimer);
+        themeTransitionTimer = window.setTimeout(() => document.documentElement.classList.remove('theme-changing'), 480);
+      }
+      document.documentElement.dataset.theme = theme;
+      try {
+        if (lock) {
+          localStorage.setItem('portfolio-theme-mode', 'locked');
+          localStorage.setItem('portfolio-theme', theme);
+        } else {
+          localStorage.setItem('portfolio-last-theme', theme);
+        }
+      } catch { /* Local preferences are optional. */ }
+      if (lock && themeRandom) themeRandom.checked = false;
+      syncThemeUI(announce);
+    };
+    const shuffleTheme = () => {
+      const options = themeIds.filter((theme) => theme !== activeTheme);
+      const nextTheme = options[Math.floor(Math.random() * options.length)] ?? 'emerald';
+      const isRandom = themeRandom?.checked ?? true;
+      applyTheme(nextTheme, !isRandom);
+      try {
+        localStorage.setItem('portfolio-theme-mode', isRandom ? 'random' : 'locked');
+        if (!isRandom) localStorage.setItem('portfolio-theme', nextTheme);
+      } catch { /* Local preferences are optional. */ }
+    };
+    const openThemePanel = () => {
+      themePanel?.classList.add('is-open');
+      themePanel?.setAttribute('aria-hidden', 'false');
+      themeToggle?.setAttribute('aria-expanded', 'true');
+      themeToggle?.setAttribute('aria-label', 'Close theme settings');
+      themePanel?.querySelector<HTMLButtonElement>('.theme-choice.is-active')?.focus();
+    };
+    const closeThemePanel = (restoreFocus = false) => {
+      themePanel?.classList.remove('is-open');
+      themePanel?.setAttribute('aria-hidden', 'true');
+      themeToggle?.setAttribute('aria-expanded', 'false');
+      themeToggle?.setAttribute('aria-label', 'Open theme settings');
+      if (restoreFocus) themeToggle?.focus();
+    };
+    const closeThemeWithFocus = () => closeThemePanel(true);
+    const toggleThemePanel = () => themePanel?.classList.contains('is-open') ? closeThemePanel() : openThemePanel();
+    const outsideThemeClick = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (themePanel?.classList.contains('is-open') && !themePanel.contains(target) && !themeToggle?.contains(target)) closeThemePanel();
+    };
+    const themeKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && themePanel?.classList.contains('is-open')) closeThemePanel(true);
+    };
+    const themeChoiceHandlers = themeChoices.map((choice) => {
+      const handler = () => applyTheme(choice.dataset.themeChoice as ThemeId, true);
+      choice.addEventListener('click', handler);
+      return { choice, handler };
+    });
+    const randomChange = () => {
+      const random = themeRandom?.checked ?? true;
+      try {
+        localStorage.setItem('portfolio-theme-mode', random ? 'random' : 'locked');
+        if (!random) localStorage.setItem('portfolio-theme', activeTheme);
+      } catch { /* Local preferences are optional. */ }
+      if (random) shuffleTheme();
+      else syncThemeUI();
+    };
+    if (themeRandom) themeRandom.checked = storedMode !== 'locked';
+    syncThemeUI(false);
+    themeToggle?.addEventListener('click', toggleThemePanel);
+    themeClose?.addEventListener('click', closeThemeWithFocus);
+    themeShuffle?.addEventListener('click', shuffleTheme);
+    themeRandom?.addEventListener('change', randomChange);
+    document.addEventListener('pointerdown', outsideThemeClick);
+    document.addEventListener('keydown', themeKeydown);
+
     // Reveal individual pieces as they enter the viewport, including on return visits.
     const detailPanels = [
       ...root.querySelectorAll<HTMLElement>('#architecture .grid > div'),
@@ -252,6 +367,14 @@
       window.removeEventListener('scroll', updateScrollState);
       progress.remove();
       domainHandlers.forEach(({ button, handler }) => button.removeEventListener('click', handler));
+      themeChoiceHandlers.forEach(({ choice, handler }) => choice.removeEventListener('click', handler));
+      themeToggle?.removeEventListener('click', toggleThemePanel);
+      themeClose?.removeEventListener('click', closeThemeWithFocus);
+      themeShuffle?.removeEventListener('click', shuffleTheme);
+      themeRandom?.removeEventListener('change', randomChange);
+      document.removeEventListener('pointerdown', outsideThemeClick);
+      document.removeEventListener('keydown', themeKeydown);
+      window.clearTimeout(themeTransitionTimer);
       window.clearInterval(timer);
       toggle?.removeEventListener('click', toggleMenu);
       copy?.removeEventListener('click', copyEmail);
