@@ -7,19 +7,50 @@
     const root = document.querySelector('main');
     if (!root) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const sections = [...root.querySelectorAll<HTMLElement>('[data-reveal]')];
+    // Reveal individual pieces as they enter the viewport, including on return visits.
+    const detailPanels = [
+      ...root.querySelectorAll<HTMLElement>('#architecture .grid > div'),
+      ...root.querySelectorAll<HTMLElement>('#orderbook-terminal > div:last-child > div'),
+      ...root.querySelectorAll<HTMLElement>('section:nth-of-type(2) .grid[class*="md:grid-cols-4"] > div')
+    ];
+    detailPanels.forEach((panel) => panel.classList.add('shine-panel'));
+    const targets = [
+      ...root.querySelectorAll<HTMLElement>('section:not(:first-child) h2'),
+      ...root.querySelectorAll<HTMLElement>('.interactive-card:not(#orderbook-terminal)'),
+      ...detailPanels
+    ];
+    // The architecture shell contains smaller cards, so reveal its contents instead.
+    const revealTargets = targets.filter((element) =>
+      !(element.classList.contains('interactive-card') && element.querySelector('.shine-panel'))
+    );
     let observer: IntersectionObserver | undefined;
     if (!reducedMotion && 'IntersectionObserver' in window) {
+      revealTargets.forEach((element) => {
+        element.classList.add('reveal-item');
+        const siblings = [...(element.parentElement?.children ?? [])].filter((sibling) =>
+          sibling.classList.contains('interactive-card') || sibling.classList.contains('shine-panel')
+        );
+        const position = siblings.indexOf(element);
+        element.style.setProperty('--reveal-delay', `${Math.max(0, position % 4) * 95}ms`);
+        if (position >= 0) element.style.setProperty('--slide-x', position % 2 ? '24px' : '-24px');
+      });
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('revealed');
-          observer?.unobserve(entry.target);
+          entry.target.classList.toggle('revealed', entry.isIntersecting);
         });
-      }, { threshold: 0.08, rootMargin: '0px 0px -35px 0px' });
-      sections.forEach((section) => observer?.observe(section));
+      }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
+      revealTargets.forEach((element) => observer?.observe(element));
       document.documentElement.classList.add('reveal-ready');
     }
+    const shineMove = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      const panel = (event.target as Element).closest<HTMLElement>('.interactive-card, .shine-panel');
+      if (!panel) return;
+      const bounds = panel.getBoundingClientRect();
+      panel.style.setProperty('--shine-x', `${event.clientX - bounds.left}px`);
+      panel.style.setProperty('--shine-y', `${event.clientY - bounds.top}px`);
+    };
+    root.addEventListener('pointermove', shineMove, { passive: true });
 
     const toggle = document.getElementById('menu-toggle');
     const mobile = document.getElementById('mobile-nav');
@@ -121,6 +152,7 @@
     return () => {
       observer?.disconnect();
       document.documentElement.classList.remove('reveal-ready');
+      root.removeEventListener('pointermove', shineMove);
       window.clearInterval(timer);
       toggle?.removeEventListener('click', toggleMenu);
       copy?.removeEventListener('click', copyEmail);
