@@ -47,30 +47,76 @@
     };
     copy?.addEventListener('click', copyEmail);
 
-    // This trading terminal is a labelled visual simulation, not a live market feed.
+    // Visual simulation only. All prices and executions below are sample data.
     const bids = [3420, 2150, 4800, 1280, 1950];
     const asks = [2890, 2100, 5120, 1150, 1840];
+    const log = root.querySelector('#execution-log-container');
+    const formatPrice = (value: number) => value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const setText = (selector: string, value: string) => {
+      const element = root.querySelector(selector);
+      if (element) element.textContent = value;
+    };
+    let bestBid = 2418.5;
+    let seed = 73;
+    const next = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
     let tick = 0;
     const timer = window.setInterval(() => {
-      if (document.hidden || reducedMotion) return;
+      if (document.hidden) return;
       tick++;
-      const bidSide = tick % 2 === 1;
-      const side = bidSide ? bids : asks;
-      const i = tick % 5;
-      side[i] = Math.max(500, side[i] + ((tick * 73) % 450) - 225);
-      root.querySelectorAll<HTMLElement>(bidSide ? '[data-bid-row]' : '[data-ask-row]').forEach((row, index) => {
-        const quantity = row.querySelector(bidSide ? '.bid-qty' : '.ask-qty');
-        if (quantity) quantity.textContent = side[index].toLocaleString('en-IN');
-        const bar = row.querySelector<HTMLElement>('.depth-bar');
-        if (bar) bar.style.width = `${Math.min(95, Math.max(25, side[index] / 60))}%`;
+      const movement = next() < 0.5 ? -0.05 : 0.05;
+      bestBid = Math.max(2409.5, Math.min(2427.5, Math.round((bestBid + movement) * 20) / 20));
+
+      (['bid', 'ask'] as const).forEach((side) => {
+        const levels = side === 'bid' ? bids : asks;
+        const changed = Math.floor(next() * levels.length);
+        levels[changed] = Math.max(500, Math.min(6000, levels[changed] + Math.round((next() - 0.5) * 1100)));
+        root.querySelectorAll<HTMLElement>(`[data-${side}-row]`).forEach((row, index) => {
+          const price = side === 'bid' ? bestBid - index * 0.05 : bestBid + (index + 1) * 0.05;
+          const quantity = row.querySelector(`.${side}-qty`);
+          const priceElement = row.querySelector(`.${side}-px`);
+          if (quantity) quantity.textContent = levels[index].toLocaleString('en-IN');
+          if (priceElement) priceElement.textContent = formatPrice(price);
+          const bar = row.querySelector<HTMLElement>('.depth-bar');
+          if (bar) bar.style.width = `${Math.min(95, Math.max(25, levels[index] / 60))}%`;
+          if (index === changed && !reducedMotion) {
+            row.classList.remove('quote-updated');
+            void row.offsetWidth;
+            row.classList.add('quote-updated');
+          }
+        });
       });
-      const bidTotal = root.querySelector('#total-bid-depth');
-      const askTotal = root.querySelector('#total-ask-depth');
-      if (bidTotal) bidTotal.textContent = bids.reduce((a,b) => a+b, 0).toLocaleString('en-IN');
-      if (askTotal) askTotal.textContent = asks.reduce((a,b) => a+b, 0).toLocaleString('en-IN');
-      const rate = root.querySelector('#live-tick-rate');
-      if (rate) rate.textContent = `~${600 + (tick * 7) % 24} ticks/sec`;
-    }, 1200);
+
+      const bidTotal = bids.reduce((sum, qty) => sum + qty, 0);
+      const askTotal = asks.reduce((sum, qty) => sum + qty, 0);
+      const imbalance = ((bidTotal - askTotal) / (bidTotal + askTotal)) * 100;
+      setText('#total-bid-depth', bidTotal.toLocaleString('en-IN'));
+      setText('#total-ask-depth', askTotal.toLocaleString('en-IN'));
+      setText('#l2-mid-price', `₹${(bestBid + 0.025).toLocaleString('en-IN', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`);
+      setText('#l2-spread', `0.05 (${(0.05 / bestBid * 100).toFixed(3)}%)`);
+      setText('#imbalance-badge', `${imbalance >= 0 ? '+' : ''}${imbalance.toFixed(1)}% ${imbalance >= 0 ? 'Buy pressure' : 'Sell pressure'}`);
+      setText('#live-tick-rate', `~${590 + Math.floor(next() * 30)} ticks/sec`);
+      setText('#buffer-pct', `${(13 + next() * 4).toFixed(1)}%`);
+
+      if (log) {
+        const action = ['BUY', 'SELL', 'MODIFY'][Math.floor(next() * 3)];
+        const quantity = (Math.floor(next() * 19) + 2) * 50;
+        const fill = action === 'BUY' ? bestBid : bestBid + 0.05;
+        const row = document.createElement('div');
+        row.className = `execution-entry flex items-center justify-between gap-2 bg-surface-container-lowest px-2 py-1 rounded border-l-2 ${action === 'SELL' ? 'border-error' : action === 'MODIFY' ? 'border-tertiary-fixed-dim' : 'border-primary-container'}`;
+        const details = document.createElement('span');
+        details.className = `font-bold ${action === 'SELL' ? 'text-error' : action === 'MODIFY' ? 'text-tertiary-fixed-dim' : 'text-primary-container'}`;
+        details.textContent = `${action} ${quantity.toLocaleString('en-IN')} @ ${formatPrice(fill)}`;
+        const status = document.createElement('span');
+        status.className = 'text-on-surface-variant font-semibold';
+        status.textContent = action === 'MODIFY' ? 'RE-QUEUED' : 'SIM ACK';
+        row.append(details, status);
+        log.prepend(row);
+        while (log.children.length > 4) log.lastElementChild?.remove();
+      }
+    }, 900);
 
     return () => {
       observer?.disconnect();
