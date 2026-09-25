@@ -14,11 +14,11 @@
       ...root.querySelectorAll<HTMLElement>('section:nth-of-type(2) .grid[class*="md:grid-cols-4"] > div')
     ];
     detailPanels.forEach((panel) => panel.classList.add('shine-panel'));
-    const targets = [
+    const targets = [...new Set([
       ...root.querySelectorAll<HTMLElement>('section:not(:first-child) h2'),
       ...root.querySelectorAll<HTMLElement>('.interactive-card:not(#orderbook-terminal)'),
-      ...detailPanels
-    ];
+      ...root.querySelectorAll<HTMLElement>('.shine-panel')
+    ])];
     // The architecture shell contains smaller cards, so reveal its contents instead.
     const revealTargets = targets.filter((element) =>
       !(element.classList.contains('interactive-card') && element.querySelector('.shine-panel'))
@@ -51,6 +51,102 @@
       panel.style.setProperty('--shine-y', `${event.clientY - bounds.top}px`);
     };
     root.addEventListener('pointermove', shineMove, { passive: true });
+
+    // Scroll progress and active navigation make the long, dense page easier to scan.
+    const progress = document.createElement('div');
+    progress.className = 'scroll-progress';
+    progress.setAttribute('aria-hidden', 'true');
+    document.body.prepend(progress);
+    const navLinks = [...document.querySelectorAll<HTMLAnchorElement>('nav[aria-label="Primary navigation"] a[href^="#"]')];
+    const navSections = navLinks
+      .map((link) => ({ link, section: link.hash ? document.querySelector<HTMLElement>(link.hash) : root.querySelector<HTMLElement>('section') }))
+      .filter((item): item is { link: HTMLAnchorElement; section: HTMLElement } => Boolean(item.section));
+    const updateScrollState = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.transform = `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`;
+      const current = [...navSections].reverse().find(({ section }) => section.getBoundingClientRect().top <= 150) ?? navSections[0];
+      navLinks.forEach((link) => link.classList.toggle('is-current', link === current?.link));
+    };
+    window.addEventListener('scroll', updateScrollState, { passive: true });
+    updateScrollState();
+
+    const domainModels = {
+      trading: {
+        kicker: 'PRODUCTION EXPERIENCE // TRADING',
+        title: 'Low-Latency Order Lifecycle',
+        summary: 'Preserve event order, absorb feed bursts, and keep broker state consistent from placement through execution.',
+        state: 'ORDERED',
+        flowLabel: 'Trading platform system flow',
+        nodes: [['Market Feed','WebSocket ticks'],['Kafka','Keyed events'],['OMS','Order lifecycle'],['Broker Adapter','Execution updates']],
+        risk: ['Out-of-order events','Partition related events by account and serialize state transitions.'],
+        choice: ['Backpressure + retry','Control bursts without losing lifecycle updates or overwhelming consumers.'],
+        control: ['Idempotent updates','Use stable keys and reconciliation to make retries safe.'],
+        evidence: 'NSE/BSE OMS, paper broker, and approximately 600 market ticks/sec ingestion.',
+        scope: 'Production and project experience'
+      },
+      wallet: {
+        kicker: 'PRODUCTION EXPERIENCE // DIGITAL WALLET',
+        title: 'Transaction Integrity Across Services',
+        summary: 'Coordinate payment, wallet, accounting, and settlement states while keeping refunds and rollbacks traceable.',
+        state: 'CONSISTENT',
+        flowLabel: 'Digital wallet transaction flow',
+        nodes: [['Payment API','Cash-in / P2P'],['Wallet','Debit or credit'],['Accounting','Ledger entry'],['Settlement','Reconcile funds']],
+        risk: ['Partial completion','A downstream failure can leave wallet and accounting states misaligned.'],
+        choice: ['Compensating flow','Model refund and rollback paths as first-class business transitions.'],
+        control: ['Maker-checker','Separate adjustment initiation and approval with an audit trail.'],
+        evidence: 'Cash-In, Cash-Out, P2P, refunds, rollbacks, accounting APIs, and Retool operations workflows.',
+        scope: 'Production experience at Barq'
+      },
+      banking: {
+        kicker: 'DOMAIN MODEL // BANKING PRODUCTS',
+        title: 'Governed Product and Pricing Rules',
+        summary: 'Externalize product definitions, eligibility, rates, fees, and exceptions so changes remain explainable and auditable.',
+        state: 'GOVERNED',
+        flowLabel: 'Banking product decision flow',
+        nodes: [['Product Catalog','Versioned offer'],['Rule Engine','Segment + eligibility'],['Rate / Fee','Margin + exception'],['Audit Trail','Explain decision']],
+        risk: ['Rule inconsistency','Scattered configuration creates conflicting offers and unclear customer outcomes.'],
+        choice: ['Centralized decisioning','Evaluate product, customer segment, rates, fees, and exceptions through governed rules.'],
+        control: ['Approval + audit','Track who changed a rule, why it changed, and which decisions used it.'],
+        evidence: 'Applicable backend foundations: rule evaluation, financial workflows, Kafka events, PostgreSQL, Redis, and audit-friendly APIs.',
+        scope: 'Domain understanding, clearly separated from work history'
+      }
+    } as const;
+    const domainButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-domain-mode]')];
+    const domainDisplay = root.querySelector<HTMLElement>('#domain-display');
+    const applyDomain = (mode: keyof typeof domainModels) => {
+      const model = domainModels[mode];
+      domainButtons.forEach((button) => {
+        const active = button.dataset.domainMode === mode;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+      const values: Record<string,string> = {
+        '#domain-kicker': model.kicker, '#domain-title': model.title, '#domain-summary': model.summary,
+        '#domain-state': model.state, '#domain-risk': model.risk[0], '#domain-risk-detail': model.risk[1],
+        '#domain-choice': model.choice[0], '#domain-choice-detail': model.choice[1],
+        '#domain-control': model.control[0], '#domain-control-detail': model.control[1],
+        '#domain-evidence': model.evidence, '#domain-scope': model.scope
+      };
+      Object.entries(values).forEach(([selector,value]) => {
+        const element = root.querySelector(selector);
+        if (element) element.textContent = value;
+      });
+      root.querySelector('#domain-flow')?.setAttribute('aria-label', model.flowLabel);
+      root.querySelectorAll<HTMLElement>('#domain-flow .domain-node').forEach((node,index) => {
+        const strong = node.querySelector('strong');
+        const small = node.querySelector('small');
+        if (strong) strong.textContent = model.nodes[index][0];
+        if (small) small.textContent = model.nodes[index][1];
+      });
+      domainDisplay?.classList.remove('is-switching');
+      void domainDisplay?.offsetWidth;
+      domainDisplay?.classList.add('is-switching');
+    };
+    const domainHandlers = domainButtons.map((button) => {
+      const handler = () => applyDomain(button.dataset.domainMode as keyof typeof domainModels);
+      button.addEventListener('click', handler);
+      return { button, handler };
+    });
 
     const toggle = document.getElementById('menu-toggle');
     const mobile = document.getElementById('mobile-nav');
@@ -153,6 +249,9 @@
       observer?.disconnect();
       document.documentElement.classList.remove('reveal-ready');
       root.removeEventListener('pointermove', shineMove);
+      window.removeEventListener('scroll', updateScrollState);
+      progress.remove();
+      domainHandlers.forEach(({ button, handler }) => button.removeEventListener('click', handler));
       window.clearInterval(timer);
       toggle?.removeEventListener('click', toggleMenu);
       copy?.removeEventListener('click', copyEmail);
