@@ -597,8 +597,8 @@
 </script>
 
 <svelte:head>
-  <title>Kanish S. — Java Backend Engineer</title>
-  <meta name="description" content="Kanish S. builds Java backend systems for trading and digital wallets. Explore experience, projects, architecture, and a downloadable résumé." />
+  <title>Kanish S — Java Backend Engineer</title>
+  <meta name="description" content="Kanish S builds Java backend systems for trading and digital wallets. Explore experience, projects, architecture, and a downloadable résumé." />
 </svelte:head>
 
 {@html terminal}
