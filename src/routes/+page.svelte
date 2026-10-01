@@ -334,7 +334,7 @@
     document.addEventListener('pointerdown', outsideThemeClick);
     document.addEventListener('keydown', themeKeydown);
 
-    // Reveal individual pieces as they enter the viewport, including on return visits.
+    // Reveal each element once so fast scrolling and anchor jumps never re-hide content.
     const detailPanels = [
       ...root.querySelectorAll<HTMLElement>('#architecture .grid > div'),
       ...root.querySelectorAll<HTMLElement>('#orderbook-terminal > div:last-child > div'),
@@ -363,7 +363,9 @@
       });
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          entry.target.classList.toggle('revealed', entry.isIntersecting);
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('revealed');
+          observer?.unobserve(entry.target);
         });
       }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
       revealTargets.forEach((element) => observer?.observe(element));
