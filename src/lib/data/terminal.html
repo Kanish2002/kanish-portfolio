@@ -195,41 +195,101 @@
 </div>
 </div>
 </section>
-<!-- SECTION 3: ENGINEERING CASE STUDIES -->
+<!-- SECTION 3: IMPACT METRICS DENSE 3x2 MODULAR BENTO GRID -->
 <section class="w-full px-margin md:px-margin-lg py-space-xl bg-surface" id="metrics" data-reveal="">
 <div class="w-full max-w-7xl mx-auto flex flex-col gap-space-lg">
 <div class="flex flex-col gap-space-xs">
-<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">// 01. ENGINEERING EVIDENCE</span>
-<h2 class="font-headline-lg text-headline-lg text-primary font-bold">Decisions Behind the Results</h2>
-<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-      The headline metrics summarize the outcome. These two production case studies show the problem, the engineering decision, and the measurable result.
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">// 01. QUANTIFIABLE IMPACT</span>
+<h2 class="font-headline-lg text-headline-lg text-primary font-bold">Engineering for Reliable Throughput</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+      Real-world production benchmarks delivered across distributed transaction pipelines, high-frequency tick brokers, and mission-critical payment rails.
     </p>
 </div>
-<div class="case-study-grid">
-<article class="case-study interactive-card">
-<div class="case-study-head">
-<div><span class="case-study-kicker">CASE 01 · ORDER PATH</span><h3>Reducing OMS API latency</h3></div>
-<span class="material-symbols-outlined text-primary-container">speed</span>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-lg">
+<!-- Card 1 (Large Focus) -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between shadow-md border border-outline-variant/30 interactive-card">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-xs text-label-xs text-primary-container uppercase tracking-wider font-semibold">OMS API OPTIMIZATION</span>
+<span class="font-headline-xl text-headline-xl text-primary font-bold">35–50%</span>
+<span class="font-headline-md text-headline-md text-secondary">Peak Latency Reduction</span>
 </div>
-<div class="case-study-story">
-<div class="case-study-step"><span>01</span><div><strong>Problem</strong><p>Repeated state reads and larger payloads increased latency on high-volume order APIs during peak activity.</p></div></div>
-<div class="case-study-step"><span>02</span><div><strong>Decision</strong><p>Introduced tiered Redis read-through caching and selective GZIP compression while preserving reliable fallbacks.</p></div></div>
-<div class="case-study-step case-study-result"><span>03</span><div><strong>Result</strong><p>Reduced peak API latency by approximately <b>35–50%</b> across the optimized request paths.</p></div></div>
+<span class="material-symbols-outlined text-[24px] text-primary-container">speed</span>
 </div>
-<a class="case-study-link interactive-link" href="#exp-zentropy">See the Zentropy progression <span class="material-symbols-outlined">arrow_forward</span></a>
-</article>
-<article class="case-study interactive-card">
-<div class="case-study-head">
-<div><span class="case-study-kicker">CASE 02 · MARKET DATA</span><h3>Absorbing bursty tick ingestion</h3></div>
-<span class="material-symbols-outlined text-secondary">stream</span>
+<div class="my-space-sm">
+<svg class="w-full h-12 text-primary-container" fill="none" preserveaspectratio="none" viewbox="0 0 500 80">
+<path d="M 0,20 Q 50,15 100,28 T 200,32 T 300,55 T 400,68 L 500,70" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
 </div>
-<div class="case-study-story">
-<div class="case-study-step"><span>01</span><div><strong>Problem</strong><p>WebSocket market bursts could overwhelm downstream consumers and make retry behavior harder to control.</p></div></div>
-<div class="case-study-step"><span>02</span><div><strong>Decision</strong><p>Used Kafka partitioning, retry handling, and backpressure-aware processing to stabilize the ingestion path.</p></div></div>
-<div class="case-study-step case-study-result"><span>03</span><div><strong>Result</strong><p>Sustained ingestion at around <b>600 ticks per second</b> with controlled retry and backpressure behavior.</p></div></div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tiered Redis read-through caching layers and selective payload GZIP compression over high-volume trading order state queries.</p>
 </div>
-<a class="case-study-link interactive-link" href="#exp-zentropy">Trace the implementation experience <span class="material-symbols-outlined">arrow_forward</span></a>
-</article>
+<!-- Card 2 (Large Focus) -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between shadow-md border border-outline-variant/30 interactive-card">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-xs text-label-xs text-secondary uppercase tracking-wider font-semibold">MARKET FEED INGESTION</span>
+<span class="font-headline-xl text-headline-xl text-primary font-bold">~600</span>
+<span class="font-headline-md text-headline-md text-secondary">Ticks / Second</span>
+</div>
+<span class="material-symbols-outlined text-[24px] text-secondary">stream</span>
+</div>
+<div class="my-space-sm p-space-xs bg-surface-container-lowest rounded font-code-sm text-code-sm flex flex-col gap-1 border border-outline-variant/30">
+<div class="flex justify-between text-on-surface-variant"><span>Backpressure:</span><span class="text-primary">Retry / backpressure</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>Packet Loss:</span><span class="text-primary-container">Sample data</span></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Automated market tick ingestion at around 600 ticks per second with retries and backpressure handling.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between shadow-md border border-outline-variant/30 interactive-card">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider font-semibold">SYSTEM RELIABILITY</span>
+<span class="font-headline-xl text-headline-xl text-primary font-bold">3+ Years</span>
+<span class="font-headline-md text-headline-md text-on-surface">Production FinTech</span>
+</div>
+<span class="material-symbols-outlined text-[24px] text-on-surface">verified_user</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant pt-space-sm">Backend experience across trading, digital wallets, payments, and accounting services.</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between shadow-md border border-outline-variant/30 interactive-card">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-xs text-label-xs text-tertiary-fixed-dim uppercase tracking-wider font-semibold">ACADEMIC FOUNDATION</span>
+<span class="font-headline-xl text-headline-xl text-tertiary-fixed-dim font-bold">9.48 / 10</span>
+<span class="font-headline-md text-headline-md text-tertiary">CGPA 9.48</span>
+</div>
+<span class="material-symbols-outlined text-[24px] text-tertiary-fixed-dim">workspace_premium</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant pt-space-sm">B.Tech in Information Technology from Sona College of Technology, Salem. Graduated with a 9.48/10 CGPA.</p>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between shadow-md border border-outline-variant/30 interactive-card">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-xs text-label-xs text-primary-container uppercase tracking-wider font-semibold">SPECIALIZED DOMAINS</span>
+<span class="font-headline-lg text-headline-lg text-primary font-bold">FinTech &amp; Core Banking</span>
+</div>
+<span class="material-symbols-outlined text-[24px] text-primary-container">account_balance</span>
+</div>
+<div class="flex flex-wrap gap-1.5 pt-space-xs">
+<span class="font-label-xs text-label-xs bg-surface-container-highest text-on-surface px-space-xs py-0.5 rounded">P2P Transfers</span>
+<span class="font-label-xs text-label-xs bg-surface-container-highest text-on-surface px-space-xs py-0.5 rounded">Cash-In / Cash-Out</span>
+<span class="font-label-xs text-label-xs bg-surface-container-highest text-on-surface px-space-xs py-0.5 rounded">Accounting flows</span>
+<span class="font-label-xs text-label-xs bg-surface-container-highest text-on-surface px-space-xs py-0.5 rounded">NSE/BSE OMS</span>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between shadow-md border border-outline-variant/30 interactive-card">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-xs text-label-xs text-secondary uppercase tracking-wider font-semibold">HIGH-CONCURRENCY</span>
+<span class="font-headline-lg text-headline-lg text-primary font-bold">Reactive Core</span>
+</div>
+<span class="material-symbols-outlined text-[24px] text-secondary">hub</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Non-blocking WebFlux and Kafka partition-ordered event dispatching, minimizing lock contention across microservice boundaries.</p>
+</div>
 </div>
 </div>
 </section>

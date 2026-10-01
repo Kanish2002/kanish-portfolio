@@ -81,22 +81,7 @@ main > div > section > .w-full.max-w-7xl { gap:clamp(1.75rem,3vw,3rem); }
 .hero-metric>span:not(.material-symbols-outlined) { color:rgb(var(--on-surface)); font:650 .8rem/1.35 'Plus Jakarta Sans',sans-serif; }
 .hero-metric>small { color:rgb(var(--on-surface-variant)); font:500 .75rem/1.4 'JetBrains Mono',monospace; }
 
-/* Recruiter-readable case studies and career progression */
-.case-study-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(1rem,2vw,1.5rem); }
-.case-study { display:flex; min-width:0; flex-direction:column; gap:1.15rem; padding:clamp(1.25rem,2.5vw,2rem); border:1px solid rgb(var(--outline-variant) / .6); border-radius:.75rem; background:linear-gradient(145deg,rgb(var(--surface-low)),rgb(var(--surface-container) / .72)); box-shadow:0 18px 46px rgb(var(--shadow) / .14); }
-.case-study-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
-.case-study-head h3 { margin:.4rem 0 0; color:rgb(var(--primary)); font:700 clamp(1.25rem,2.2vw,1.65rem)/1.2 'Plus Jakarta Sans',sans-serif; }
-.case-study-head>.material-symbols-outlined { padding:.6rem; border:1px solid rgb(var(--accent) / .25); border-radius:.5rem; background:rgb(var(--accent) / .08); font-size:1.35rem; }
-.case-study-kicker { color:rgb(var(--secondary)); font:700 .76rem/1.4 'JetBrains Mono',monospace; letter-spacing:.08em; }
-.case-study-story { display:flex; flex-direction:column; }
-.case-study-step { position:relative; display:grid; grid-template-columns:2rem 1fr; gap:.8rem; padding:.85rem 0; border-top:1px solid rgb(var(--outline-variant) / .55); }
-.case-study-step>span { display:grid; place-items:center; width:1.8rem; height:1.8rem; color:rgb(var(--accent)); border:1px solid rgb(var(--accent) / .32); border-radius:50%; background:rgb(var(--accent) / .08); font:700 .72rem 'JetBrains Mono',monospace; }
-.case-study-step strong { display:block; color:rgb(var(--on-surface)); font-size:.92rem; }
-.case-study-step p { margin:.25rem 0 0; color:rgb(var(--on-surface-variant)); font-size:.88rem; line-height:1.62; }
-.case-study-result { margin-top:.15rem; padding:.9rem; border:1px solid rgb(var(--accent) / .28); border-radius:.5rem; background:rgb(var(--accent) / .07); }
-.case-study-result p b { color:rgb(var(--primary)); }
-.case-study-link { display:inline-flex; align-items:center; gap:.4rem; width:max-content; margin-top:auto; color:rgb(var(--accent)); font:700 .78rem/1.4 'JetBrains Mono',monospace; }
-.case-study-link .material-symbols-outlined { font-size:1rem; }
+/* Recruiter-readable career progression */
 .career-year { color:rgb(var(--on-surface-variant)); font-size:.75rem; line-height:1.4; }
 .role-progression { position:relative; display:flex; flex-direction:column; gap:.15rem; margin:.15rem 0; padding-left:.35rem; }
 .role-progression::before { content:''; position:absolute; left:.79rem; top:1rem; bottom:1rem; width:1px; background:linear-gradient(rgb(var(--accent)),rgb(var(--secondary)),rgb(var(--outline-variant))); }
@@ -238,7 +223,6 @@ main > div > section > .w-full.max-w-7xl { gap:clamp(1.75rem,3vw,3rem); }
   .domain-mode-rail { display:grid; grid-template-columns:repeat(3,1fr); border-right:0; border-bottom:1px solid rgb(var(--surface-high)); }
   .domain-mode { grid-template-columns:auto 1fr; }
   .domain-mode-index { display:none; }
-  .case-study-grid { grid-template-columns:1fr; }
 }
 @media (max-width: 680px) {
   main > div > section { padding-top:3rem; padding-bottom:3rem; }
@@ -251,8 +235,6 @@ main > div > section > .w-full.max-w-7xl { gap:clamp(1.75rem,3vw,3rem); }
   .hero-metrics { padding:.6rem; }
   .hero-metrics-grid { gap:.6rem; }
   .hero-metric { min-height:132px; padding:.8rem .55rem; }
-  .case-study { padding:1.15rem; }
-  .case-study-result { padding:.75rem; }
   header .h-16 { gap: .4rem; }
   section { overflow-x: clip; }
   #orderbook-terminal { overflow-x: auto; }
